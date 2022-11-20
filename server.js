@@ -4,6 +4,8 @@ const mySql = require("mysql2/promise");
 const inquirer = require("inquirer");
 const consoleDotTable = require("console.table");
 
+let connection = null;
+
 async function main() {
     console.log("running main");
     while (true) {
@@ -80,13 +82,34 @@ async function main() {
         console.log(answers);
         switch(answers.option) {
             case "view all departments":{
-
+                const [rows] = await connection.execute("SELECT * FROM department")
+                console.table(rows)
+                console.log(rows)
+            break;
+            }
+            case "add a department":{
+                await connection.execute(`
+                INSERT INTO department (name)
+                VALUES ("${answers.new_department_name}");
+                `)
+            console.log("added new department to database")    
+            break;
+            }
+            case "view all employees":{
+                const [rows] = await connection.execute("SELECT * FROM employee")
+                console.table(rows)
+            break;    
+            }
+            case "view all roles":{
+                const [rows] = await connection.execute("SELECT * FROM role")
+                console.table(rows)
+            break;    
             }
         }    
     }
 }
 async function db_Connection(){
-    const connection = await mySql.createConnection(
+    connection = await mySql.createConnection(
         {
          host: process.env.MY_SQL_HOST,
          user: process.env.MY_SQL_USERNAME,

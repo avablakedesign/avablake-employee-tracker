@@ -43,9 +43,15 @@ async function main() {
                 when: (answers) => answers.option === "add a role"
             },
             {
-                type:"input",
+                type:"list",
                 name:"new_role_department",
                 message: "What is the department name?",
+                choices: async function(){
+                    const [rows] = await connection.execute("SELECT name FROM department");
+                    return rows.map(function(department){
+                        return {key: department.name, value: department.name}
+                    })
+                },
                 when: (answers) => answers.option === "add a role"
             },
             {
@@ -61,15 +67,24 @@ async function main() {
                 when: (answers) => answers.option === "add an employee"
             },
             {
-                type:"input",
+                type:"list",
                 name: "new_employee_job_title",
                 message: "What is your job title?",
+                choices: async function(){
+                    const [rows] = await connection.execute("SELECT title FROM role");
+                    return rows.map(function(role){
+                        return {key: role.title, value: role.title}
+                    })
+                },
                 when: (answers) => answers.option === "add an employee"
             },
             {
-                type:"input",
+                type:"list",
                 name:"new_employee_manager",
                 message: "What is the manager's name?",
+                choices: async function(){
+                    const [rows] = await connection.execute("SELECT first_name FROM employee")
+                },
                 when: (answers) => answers.option === "add an employee"
             },
             {
@@ -104,6 +119,22 @@ async function main() {
                 const [rows] = await connection.execute("SELECT * FROM role")
                 console.table(rows)
             break;    
+            }
+            case "add a role":{
+                if (isNaN(parseFloat(answers.new_role_salary))) {
+                    console.log("Salary must be a number, try again.")
+                }
+                else {
+                    await connection.execute(`
+                    INSERT INTO role (title, salary, department_id)
+                    VALUES ("${answers.new_role_title}", ${parseFloat(answers.new_role_salary)}, (SELECT id FROM department WHERE name = "${answers.new_role_department}"))
+                    `)
+                    console.log("added new role to database");
+                }
+            break;
+            }
+            case "add an employee":{
+
             }
         }    
     }

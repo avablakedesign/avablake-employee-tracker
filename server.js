@@ -7,7 +7,6 @@ const consoleDotTable = require("console.table");
 let connection = null;
 
 async function main() {
-    console.log("running main");
     while (true) {
         const answers = await inquirer.prompt([
             {
@@ -125,12 +124,10 @@ async function main() {
                 when: (answers) => answers.option === "update an employee role"
             },
         ])
-        console.log(answers);
         switch(answers.option) {
             case "view all departments":{
                 const [rows] = await connection.execute("SELECT * FROM department")
                 console.table(rows)
-                console.log(rows)
             break;
             }
             case "add a department":{
@@ -168,10 +165,8 @@ async function main() {
                 let manager = null;
                 if (answers.new_employee_manager !== "none"){
                     const [db_manager] = await connection.execute(`SELECT id FROM employee WHERE first_name = "${answers.new_employee_manager}"`);
-                    console.log(db_manager);
                     manager = db_manager[0].id
                 }   
-                // const [manager] = answers.new_employee_manager === "none" ? null : await connection.execute(`SELECT id FROM employee WHERE first_name = "${answers.new_employee_manager}"`);
                 await connection.execute(`
                 INSERT INTO employee (first_name, last_name, role_id, manager_id)
                 VALUES ("${answers.new_employee_first_name}", "${answers.new_employee_last_name}", (Select id FROM role WHERE title = "${answers.new_employee_job_title}"), ${manager})`)
@@ -181,8 +176,9 @@ async function main() {
                 await connection.execute(`
                 UPDATE employee 
                 SET role_id = (SELECT id FROM role WHERE title = "${answers.update_employee_role}")
-                WHERE 
+                WHERE first_name = "${answers.update_employee_name}"
                 `)
+                console.log("updated employee role");
             }
         }    
     }

@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS avablake_employee_tracker_db;
+CREATE DATABASE avablake_employee_tracker_db;  
+USE avablake_employee_tracker_db; 
+
 CREATE TABLE department (
    id INT AUTO_INCREMENT PRIMARY KEY,
    name VARCHAR(30) NOT NULL

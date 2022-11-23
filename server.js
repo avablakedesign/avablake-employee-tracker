@@ -83,14 +83,45 @@ async function main() {
                 name:"new_employee_manager",
                 message: "What is the manager's name?",
                 choices: async function(){
-                    const [rows] = await connection.execute("SELECT first_name FROM employee")
+                    const [rows] = await connection.execute(`SELECT first_name FROM employee
+                    INNER JOIN role
+                    ON role.id = employee.role_id 
+                    WHERE role.title = "Manager"
+                    `)
+                    if (rows.length > 0) {
+                        const options = rows.map(function(manager) {
+                            return {key: manager.first_name, value: manager.first_name}
+                        })
+                        options.push({key:"none", value:"none"})
+                        return options
+                    } else {
+                        return [{key:"none", value:"none"}]
+                    } 
                 },
                 when: (answers) => answers.option === "add an employee"
             },
             {
-                type:"input",
+                type:"list",
+                name: "update_employee_name",
+                message: "Which employee would you like to update?",
+                choices: async function(){
+                    const [rows] = await connection.execute(`SELECT first_name FROM employee`)
+                    return rows.map(function(employee){
+                        return {key: employee.first_name, value: employee.first_name}
+                    })
+                },
+                when: (answers) => answers.option === "update an employee role"
+            },
+            {
+                type:"list",
                 name: "update_employee_role",
                 message: "What is the new job title?",
+                choices: async function(){
+                    const [rows] = await connection.execute("SELECT title FROM role");
+                    return rows.map(function(role){
+                        return {key: role.title, value: role.title}
+                    })
+                },
                 when: (answers) => answers.option === "update an employee role"
             },
         ])
@@ -134,7 +165,24 @@ async function main() {
             break;
             }
             case "add an employee":{
-
+                let manager = null;
+                if (answers.new_employee_manager !== "none"){
+                    const [db_manager] = await connection.execute(`SELECT id FROM employee WHERE first_name = "${answers.new_employee_manager}"`);
+                    console.log(db_manager);
+                    manager = db_manager[0].id
+                }   
+                // const [manager] = answers.new_employee_manager === "none" ? null : await connection.execute(`SELECT id FROM employee WHERE first_name = "${answers.new_employee_manager}"`);
+                await connection.execute(`
+                INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                VALUES ("${answers.new_employee_first_name}", "${answers.new_employee_last_name}", (Select id FROM role WHERE title = "${answers.new_employee_job_title}"), ${manager})`)
+                console.log("added new employee to the database");
+            }
+            case "update an employee role":{
+                await connection.execute(`
+                UPDATE employee 
+                SET role_id = (SELECT id FROM role WHERE title = "${answers.update_employee_role}")
+                WHERE 
+                `)
             }
         }    
     }

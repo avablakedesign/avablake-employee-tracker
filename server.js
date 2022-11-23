@@ -1,15 +1,18 @@
+//These require in external packages
 const dotenv = require("dotenv");
 dotenv.config()
 const mySql = require("mysql2/promise");
 const inquirer = require("inquirer");
 const consoleDotTable = require("console.table");
-
+//This variable is set to null to be used later.
 let connection = null;
-
+//This is the main loop for inquirer, it asks questions and prints out the information for m the database.
 async function main() {
+    //This is the while loop for the questions set to true to loop through them.
     while (true) {
         const answers = await inquirer.prompt([
             {
+                //This provides the data to inquirer to render a list of choices in the app.
                 type : "list",
                 name: "option",
                 message: "Choose from the following",
@@ -27,6 +30,7 @@ async function main() {
                 type:"input",
                 name:"new_department_name",
                 message: "What is your department name?",
+                //This renders the question only if the answer option matches what is selected from the list.
                 when: (answers) => answers.option === "add a department"
             },
             {
@@ -45,8 +49,11 @@ async function main() {
                 type:"list",
                 name:"new_role_department",
                 message: "What is the department name?",
+                //Choices used in inquirer to create a list of selectable choices.
+                //Here is where I set the choices, getting all possible options from the database.
                 choices: async function(){
                     const [rows] = await connection.execute("SELECT name FROM department");
+                    //Here I transform the rows array into a new array with a new data structure to be used by inquirer. 
                     return rows.map(function(department){
                         return {key: department.name, value: department.name}
                     })
@@ -82,6 +89,7 @@ async function main() {
                 name:"new_employee_manager",
                 message: "What is the manager's name?",
                 choices: async function(){
+                    //This executes a JOIN to find all managers in the employees table.
                     const [rows] = await connection.execute(`SELECT first_name FROM employee
                     INNER JOIN role
                     ON role.id = employee.role_id 
@@ -124,6 +132,7 @@ async function main() {
                 when: (answers) => answers.option === "update an employee role"
             },
         ])
+        //This switches over the possible selected answer options.
         switch(answers.option) {
             case "view all departments":{
                 const [rows] = await connection.execute("SELECT * FROM department")
@@ -166,11 +175,13 @@ async function main() {
                 if (answers.new_employee_manager !== "none"){
                     const [db_manager] = await connection.execute(`SELECT id FROM employee WHERE first_name = "${answers.new_employee_manager}"`);
                     manager = db_manager[0].id
-                }   
+                }
+                //This adds a new employee to the database with data selected from inquirer.    
                 await connection.execute(`
                 INSERT INTO employee (first_name, last_name, role_id, manager_id)
                 VALUES ("${answers.new_employee_first_name}", "${answers.new_employee_last_name}", (Select id FROM role WHERE title = "${answers.new_employee_job_title}"), ${manager})`)
                 console.log("added new employee to the database");
+            break;
             }
             case "update an employee role":{
                 await connection.execute(`
@@ -179,10 +190,12 @@ async function main() {
                 WHERE first_name = "${answers.update_employee_name}"
                 `)
                 console.log("updated employee role");
+            break;    
             }
         }    
     }
 }
+//This connections to the mysql database, it uses the parameters that is passed in.
 async function db_Connection(){
     connection = await mySql.createConnection(
         {

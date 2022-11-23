@@ -1,7 +1,8 @@
+--This recreates the database when running SOURCE schema.sql.
 DROP DATABASE IF EXISTS avablake_employee_tracker_db;
 CREATE DATABASE avablake_employee_tracker_db;  
 USE avablake_employee_tracker_db; 
-
+--This creates the table with the specified schema.
 CREATE TABLE department (
    id INT AUTO_INCREMENT PRIMARY KEY,
    name VARCHAR(30) NOT NULL
@@ -12,6 +13,7 @@ CREATE TABLE role (
     title VARCHAR(30) NOT NULL,
     salary DECIMAL NOT NULL,
     department_id INT NOT NULL,
+    --This creates an association between tables.
     FOREIGN KEY (department_id)
     REFERENCES department(id)
 ); 

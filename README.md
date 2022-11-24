@@ -24,7 +24,7 @@ This is a Employee Tracker app programmed by Ava Blake Design.
  ## Usage
  ![screenshot](employee-tracker-screenshot.png)
 
- <iframe style="width: 400px; height: 225px; display: inline-block;" src="https://courses.bootcampspot.com/media_objects_iframe/m-5wxh2A5vquxwcPwmkGmGks7fLRuz8K96?type=video" allowfullscreen="allowfullscreen" data-mce-src="https://courses.bootcampspot.com/media_objects_iframe/m-5wxh2A5vquxwcPwmkGmGks7fLRuz8K96?type=video" data-mce-style="width: 400px; height: 225px; display: inline-block;"></iframe>
+<a href="https://courses.bootcampspot.com/media_objects_iframe/m-5wxh2A5vquxwcPwmkGmGks7fLRuz8K96?type=video">Walkthrough Video</a>
 
  ## License
  This project is covered under MIT.
